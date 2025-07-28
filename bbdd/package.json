@@ -1,0 +1,22 @@
+{
+	"name": "bbdd",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"setup": "node setup.js",
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"test": "vitest",
+		"db:create": "wrangler d1 create ismael-web-db",
+		"db:schema": "wrangler d1 execute my-db-name --file=./schema.sql",
+		"db:query": "wrangler d1 execute my-db-name --command",
+		"db:backup": "wrangler d1 export my-db-name --output=backup.sql",
+		"logs": "wrangler tail"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.8.19",
+		"vitest": "~3.2.0",
+		"wrangler": "^4.26.0"
+	}
+}
