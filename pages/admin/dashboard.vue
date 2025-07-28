@@ -348,23 +348,42 @@ const editForms = ref({
   }
 })
 
+// Función para cargar datos desde la API
+const loadData = () => {
+  // Cargar datos desde la API (content viene de useContentAPI)
+  if (content.value) {
+    editForms.value.about = { 
+      title: content.value.about?.title || '',
+      content: content.value.about?.content || ''
+    }
+    editForms.value.experience = { 
+      title: 'Experiencia Profesional',
+      items: content.value.experience?.items ? [...content.value.experience.items] : []
+    }
+    editForms.value.projects = { 
+      title: 'Proyectos Destacados',
+      items: content.value.projects?.items ? [...content.value.projects.items] : []
+    }
+    editForms.value.contact = { 
+      title: content.value.contact?.title || '',
+      description: content.value.contact?.description || '',
+      email: content.value.contact?.email || '',
+      buttonText: content.value.contact?.buttonText || ''
+    }
+  }
+}
+
 // Cargar datos al montar
 onMounted(() => {
   loadData()
 })
 
-const loadData = () => {
-  editForms.value.about = { ...content.value.about }
-  editForms.value.experience = { 
-    ...content.value.experience,
-    items: [...content.value.experience.items]
+// Watcher para cargar datos cuando cambie el contenido
+watch(content, (newContent) => {
+  if (newContent) {
+    loadData()
   }
-  editForms.value.projects = { 
-    ...content.value.projects,
-    items: [...content.value.projects.items]
-  }
-  editForms.value.contact = { ...content.value.contact }
-}
+}, { immediate: true, deep: true })
 
 // Funciones de guardado en backend
 const saveAbout = async () => {
