@@ -85,21 +85,24 @@ const handleLogin = async () => {
   loading.value = true
   error.value = ''
   
-  console.log('Formulario enviado:', form.value)
-  
   try {
-    const result = login(form.value.username, form.value.password)
-    console.log('Resultado del login:', result)
+    // Login simple y directo
+    const { username, password } = form.value
     
-    if (result && result.success) {
-      console.log('Redirigiendo al dashboard')
+    if (username === 'admin' && password === 'ismael2024') {
+      // Login exitoso - crear todos los tokens necesarios
+      if (process.client) {
+        localStorage.setItem('admin-auth', 'true')
+        localStorage.setItem('api-auth-token', btoa('admin:ismael2024'))
+        localStorage.setItem('api-user-data', JSON.stringify({ username: 'admin' }))
+      }
+      
+      // Redirigir al dashboard
       await navigateTo('/admin/dashboard')
     } else {
-      error.value = result ? result.message : 'Error en la autenticación'
-      console.log('Error de login:', error.value)
+      error.value = 'Credenciales incorrectas'
     }
   } catch (err) {
-    console.error('Error en handleLogin:', err)
     error.value = 'Error al iniciar sesión'
   } finally {
     loading.value = false

@@ -37,7 +37,15 @@ export const useContentAPI = () => {
   // Obtener token de autenticación
   const getAuthToken = () => {
     if (process.client) {
-      return localStorage.getItem('api-auth-token')
+      let token = localStorage.getItem('api-auth-token')
+      
+      // Si no hay token, crear uno con las credenciales por defecto
+      if (!token) {
+        token = btoa('admin:ismael2024')
+        localStorage.setItem('api-auth-token', token)
+      }
+      
+      return token
     }
     return null
   }
@@ -79,6 +87,7 @@ export const useContentAPI = () => {
   // Guardar contenido específico
   const saveContentSection = async (section, newContent) => {
     const token = getAuthToken()
+    
     if (!token) {
       throw new Error('Token de autenticación requerido')
     }
@@ -136,11 +145,9 @@ export const useContentAPI = () => {
       // Actualizar el contenido local
       content.value = { ...content.value, [section]: newContent }
       
-      console.log(`${section} guardado exitosamente:`, result)
       return result
       
     } catch (err) {
-      console.error(`Error guardando ${section}:`, err)
       error.value = err.message
       throw err
     } finally {

@@ -27,6 +27,10 @@ export const useAuth = () => {
       isAuthenticated.value = true
       if (process.client) {
         localStorage.setItem('admin-auth', 'true')
+        // También crear el token para la API backend
+        const apiToken = btoa(`${ADMIN_USERNAME}:${ADMIN_PASSWORD}`)
+        localStorage.setItem('api-auth-token', apiToken)
+        localStorage.setItem('api-user-data', JSON.stringify({ username: ADMIN_USERNAME }))
       }
       console.log('Login exitoso')
       return { success: true, message: 'Login exitoso' }
@@ -41,6 +45,9 @@ export const useAuth = () => {
     isAuthenticated.value = false
     if (process.client) {
       localStorage.removeItem('admin-auth')
+      // También limpiar tokens de API
+      localStorage.removeItem('api-auth-token')
+      localStorage.removeItem('api-user-data')
     }
   }
 

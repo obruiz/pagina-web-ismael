@@ -89,5 +89,5 @@
 </template>
 
 <script setup>
-const { content } = useContent()
+const { content } = useContentAPI()
 </script>

@@ -262,7 +262,7 @@
       v-if="showSuccess"
       class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-md shadow-lg"
     >
-      ¡Cambios guardados exitosamente!
+      ¡Cambios guardados en la base de datos!
     </div>
     
     <!-- Mensaje de error -->
@@ -271,6 +271,19 @@
       class="fixed bottom-4 right-4 bg-red-600 text-white px-6 py-3 rounded-md shadow-lg"
     >
       {{ errorMessage }}
+    </div>
+    
+    <!-- Overlay de carga -->
+    <div
+      v-if="isLoading"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div class="flex items-center space-x-3">
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+          <span class="text-gray-900 dark:text-white">Guardando en base de datos...</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -287,12 +300,19 @@ onMounted(() => {
     const authStatus = localStorage.getItem('admin-auth')
     if (authStatus !== 'true') {
       navigateTo('/admin/login')
+    } else {
+      // Asegurar que el token de API esté disponible
+      let apiToken = localStorage.getItem('api-auth-token')
+      if (!apiToken) {
+        apiToken = btoa('admin:ismael2024')
+        localStorage.setItem('api-auth-token', apiToken)
+      }
     }
   }
 })
 
 const { logout } = useAuth()
-const { content, saveContent } = useContent()
+const { content, saveContentSection, isLoading, error } = useContentAPI()
 
 const activeTab = ref('about')
 const showSuccess = ref(false)
@@ -346,44 +366,44 @@ const loadData = () => {
   editForms.value.contact = { ...content.value.contact }
 }
 
-// Funciones de guardado
+// Funciones de guardado en backend
 const saveAbout = async () => {
   try {
-    saveContent({ about: editForms.value.about })
+    await saveContentSection('about', editForms.value.about)
     showSuccessMessage()
   } catch (err) {
     console.error('Error guardando about:', err)
-    showErrorMessage('Error al guardar la información.')
+    showErrorMessage('Error al guardar la información. Verifica tu conexión.')
   }
 }
 
 const saveExperience = async () => {
   try {
-    saveContent({ experience: editForms.value.experience })
+    await saveContentSection('experience', editForms.value.experience)
     showSuccessMessage()
   } catch (err) {
     console.error('Error guardando experience:', err)
-    showErrorMessage('Error al guardar la experiencia.')
+    showErrorMessage('Error al guardar la experiencia. Verifica tu conexión.')
   }
 }
 
 const saveProjects = async () => {
   try {
-    saveContent({ projects: editForms.value.projects })
+    await saveContentSection('projects', editForms.value.projects)
     showSuccessMessage()
   } catch (err) {
     console.error('Error guardando projects:', err)
-    showErrorMessage('Error al guardar los proyectos.')
+    showErrorMessage('Error al guardar los proyectos. Verifica tu conexión.')
   }
 }
 
 const saveContact = async () => {
   try {
-    saveContent({ contact: editForms.value.contact })
+    await saveContentSection('contact', editForms.value.contact)
     showSuccessMessage()
   } catch (err) {
     console.error('Error guardando contact:', err)
-    showErrorMessage('Error al guardar la información de contacto.')
+    showErrorMessage('Error al guardar la información de contacto. Verifica tu conexión.')
   }
 }
 
