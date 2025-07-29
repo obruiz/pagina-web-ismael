@@ -18,10 +18,10 @@
     <!-- About Section -->
     <section id="about" class="py-16 bg-gray-50 dark:bg-gray-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ t('about') }}</h2>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ aboutTitle }}</h2>
         <div class="prose dark:prose-invert max-w-none">
           <p class="text-gray-600 dark:text-gray-300 whitespace-pre-line">
-            {{ getLocalizedContent('about') }}
+            {{ localizedAboutContent }}
           </p>
         </div>
       </div>
@@ -30,7 +30,7 @@
     <!-- Experience Section -->
     <section id="experience" class="py-16 bg-white dark:bg-gray-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ t('experience') }}</h2>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ experienceTitle }}</h2>
         <div class="space-y-8">
           <div 
             v-for="item in content.experience.items" 
@@ -50,7 +50,7 @@
     <!-- Projects Section -->
     <section id="projects" class="py-16 bg-gray-50 dark:bg-gray-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ t('projects') }}</h2>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ projectsTitle }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div 
             v-for="item in content.projects.items" 
@@ -71,7 +71,7 @@
     <!-- Contact Section -->
     <section id="contact" class="py-16 bg-white dark:bg-gray-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ t('contact') }}</h2>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ contactTitle }}</h2>
         <div class="text-center">
           <p class="text-gray-600 dark:text-gray-300 mb-4 whitespace-pre-line">
             {{ content.contact.description }}
@@ -89,12 +89,39 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from '~/composables/useI18n'
+import { useContentAPI } from '~/composables/useContentAPI'
 
 const { content } = useContentAPI()
-const { t, currentLocale } = useI18n()
+const { t, currentLocale, currentTranslations } = useI18n()
 
-// Función para obtener contenido localizado
+// Computed properties para títulos reactivos (usando currentTranslations)
+const aboutTitle = computed(() => {
+  console.log('🔄 Recalculando aboutTitle:', currentTranslations.value.about)
+  return currentTranslations.value.about || 'about'
+})
+const experienceTitle = computed(() => currentTranslations.value.experience || 'experience') 
+const projectsTitle = computed(() => currentTranslations.value.projects || 'projects')
+const contactTitle = computed(() => currentTranslations.value.contact || 'contact')
+
+// Computed property para contenido localizado reactivo
+const localizedAboutContent = computed(() => {
+  const locale = currentLocale.value
+  const aboutData = content.value?.about
+  
+  if (!aboutData) return ''
+  
+  // Si el contenido tiene versiones en diferentes idiomas
+  if (aboutData.content_es && aboutData.content_en) {
+    return locale === 'es' ? aboutData.content_es : aboutData.content_en
+  }
+  
+  // Fallback al contenido original
+  return aboutData.content || ''
+})
+
+// Función para obtener contenido localizado (para otras secciones)
 const getLocalizedContent = (section) => {
   if (!content.value?.[section]) return ''
   

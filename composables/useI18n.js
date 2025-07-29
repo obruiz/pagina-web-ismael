@@ -1,4 +1,4 @@
-import { ref, readonly, onMounted } from 'vue'
+import { ref, readonly, onMounted, computed, toRef } from 'vue'
 
 export const useI18n = () => {
   // Traducciones para los elementos de interfaz
@@ -112,19 +112,26 @@ export const useI18n = () => {
   // Estado reactivo del idioma actual
   const currentLocale = ref('es')
 
-  // Función para obtener una traducción
+  // Función para obtener una traducción (reactiva)
   const t = (key) => {
     return translations[currentLocale.value]?.[key] || key
   }
+
+  // Traducciones actuales como computed reactivo
+  const currentTranslations = computed(() => {
+    console.log('🔄 Recalculando currentTranslations para idioma:', currentLocale.value)
+    return translations[currentLocale.value] || {}
+  })
 
   // Función para cambiar el idioma
   const setLocale = (locale) => {
     if (translations[locale]) {
       currentLocale.value = locale
       // Guardar preferencia en localStorage
-      if (process.client) {
+            if (process.client) {
         localStorage.setItem('preferred-locale', locale)
       }
+      console.log('🌐 Idioma cambiado a:', locale)
     }
   }
 
@@ -150,7 +157,8 @@ export const useI18n = () => {
   })
 
   return {
-    currentLocale: readonly(currentLocale),
+    currentLocale,
+    currentTranslations,
     t,
     setLocale,
     toggleLocale,

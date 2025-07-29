@@ -9,10 +9,10 @@
         <!-- Desktop Menu -->
         <div class="hidden md:block">
           <div class="ml-10 flex items-baseline space-x-4">
-            <NuxtLink to="#about" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('about') }}</NuxtLink>
-            <NuxtLink to="#experience" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('experience') }}</NuxtLink>
-            <NuxtLink to="#projects" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('projects') }}</NuxtLink>
-            <NuxtLink to="#contact" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('contact') }}</NuxtLink>
+                    <NuxtLink to="#about" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('about') }}</NuxtLink>
+        <NuxtLink to="#experience" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('experience') }}</NuxtLink>
+        <NuxtLink to="#projects" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('projects') }}</NuxtLink>
+        <NuxtLink to="#contact" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('contact') }}</NuxtLink>
             
             <a 
               href="/curriculum.pdf" 
