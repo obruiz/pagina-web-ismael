@@ -11,6 +11,8 @@ export const useContentAPI = () => {
     },
     about: {
       title: "Sobre mí",
+      content_es: "Soy un ingeniero químico apasionado por la innovación y la mejora continua de procesos industriales. Mi experiencia se centra en el desarrollo y optimización de procesos químicos, con un fuerte énfasis en la sostenibilidad y la eficiencia energética.",
+      content_en: "I am a chemical engineer passionate about innovation and continuous improvement of industrial processes. My experience focuses on the development and optimization of chemical processes, with a strong emphasis on sustainability and energy efficiency.",
       content: "Soy un ingeniero químico apasionado por la innovación y la mejora continua de procesos industriales. Mi experiencia se centra en el desarrollo y optimización de procesos químicos, con un fuerte énfasis en la sostenibilidad y la eficiencia energética."
     },
     experience: {
@@ -51,129 +53,111 @@ export const useContentAPI = () => {
   }
 
   // Cargar todo el contenido desde la API
-  const loadContent = async () => {
+  const loadContent = async (forceRefresh = false) => {
     isLoading.value = true
     error.value = null
     
     try {
-      const response = await fetch(`${baseURL}/content/all`)
+      // Agregar cache busting cuando se fuerza el refresh
+      const cacheBuster = forceRefresh ? `?t=${Date.now()}` : ''
+      const response = await fetch(`${baseURL}/content/all${cacheBuster}`)
       
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
+        throw new Error('Error al cargar el contenido')
       }
       
       const data = await response.json()
       
-      // Combinar con contenido por defecto para asegurar que todas las propiedades existan
-      content.value = {
-        hero: defaultContent.hero, // Hero no se gestiona desde la API
-        about: data.about || defaultContent.about,
-        experience: data.experience || defaultContent.experience,
-        projects: data.projects || defaultContent.projects,
-        contact: data.contact || defaultContent.contact
+      // Procesar y estructurar el contenido
+      if (data) {
+        const structuredContent = {
+          hero: defaultContent.hero, // Hero section no cambia
+          about: {
+            title: data.about?.title || defaultContent.about.title,
+            content_es: data.about?.content_es || data.about?.content || defaultContent.about.content_es,
+            content_en: data.about?.content_en || defaultContent.about.content_en,
+            content: data.about?.content || data.about?.content_es || defaultContent.about.content
+          },
+          experience: {
+            title: defaultContent.experience.title,
+            items: data.experience?.items || []
+          },
+          projects: {
+            title: defaultContent.projects.title,
+            items: data.projects?.items || []
+          },
+          contact: {
+            title: defaultContent.contact.title,
+            description: data.contact?.description || defaultContent.contact.description,
+            email: data.contact?.email || defaultContent.contact.email,
+            buttonText: data.contact?.buttonText || data.contact?.button_text || defaultContent.contact.buttonText
+          }
+        }
+        
+        content.value = structuredContent
+        console.log('✅ Contenido cargado correctamente:', structuredContent)
       }
-      
-      console.log('Contenido cargado desde la API:', content.value)
     } catch (err) {
-      console.error('Error cargando contenido:', err)
+      console.error('Error loading content:', err)
       error.value = err.message
-      // Usar contenido por defecto en caso de error
       content.value = defaultContent
     } finally {
       isLoading.value = false
     }
   }
 
-  // Guardar contenido específico
-  const saveContentSection = async (section, newContent) => {
-    const token = getAuthToken()
-    
-    if (!token) {
-      throw new Error('Token de autenticación requerido')
-    }
-
+  // Guardar una sección específica de contenido
+  const saveContentSection = async (section, data) => {
     isLoading.value = true
     error.value = null
-
+    
     try {
-      let endpoint = ''
-      let method = 'PUT'
-      let body = {}
-
-      // Determinar endpoint según la sección
-      switch (section) {
-        case 'about':
-          endpoint = '/admin/about'
-          body = newContent
-          break
-        
-        case 'experience':
-          endpoint = '/admin/experience/bulk'
-          body = { items: newContent.items }
-          break
-        
-        case 'projects':
-          endpoint = '/admin/projects/bulk'
-          body = { items: newContent.items }
-          break
-        
-        case 'contact':
-          endpoint = '/admin/contact'
-          body = newContent
-          break
-        
-        default:
-          throw new Error(`Sección desconocida: ${section}`)
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('No hay token de autenticación')
       }
 
-      const response = await fetch(`${baseURL}${endpoint}`, {
-        method,
+      // Determinar la URL y datos según la sección
+      let url = `${baseURL}/admin/${section}`
+      let requestData = data
+
+      // Para experience y projects usar las rutas bulk
+      if (section === 'experience') {
+        url = `${baseURL}/admin/experience/bulk`
+        requestData = { items: data.items }
+      } else if (section === 'projects') {
+        url = `${baseURL}/admin/projects/bulk`
+        requestData = { items: data.items }
+      }
+
+      const response = await fetch(url, {
+        method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(requestData)
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || `Error ${response.status}`)
+        throw new Error(errorData.error || 'Error interno del servidor')
       }
 
       const result = await response.json()
       
-      // Actualizar el contenido local
-      content.value = { ...content.value, [section]: newContent }
+      // Recargar todo el contenido desde la API después de guardar
+      await loadContent(true) // Force refresh
       
+      console.log('✅ Sección guardada correctamente:', section)
       return result
-      
     } catch (err) {
+      console.error(`Error saving ${section}:`, err)
       error.value = err.message
       throw err
     } finally {
       isLoading.value = false
     }
-  }
-
-  // Función compatible con el composable anterior
-  const saveContent = (newContent) => {
-    // Esta función mantiene compatibilidad con el código existente
-    const promises = []
-    
-    if (newContent.about) {
-      promises.push(saveContentSection('about', newContent.about))
-    }
-    if (newContent.experience) {
-      promises.push(saveContentSection('experience', newContent.experience))
-    }
-    if (newContent.projects) {
-      promises.push(saveContentSection('projects', newContent.projects))
-    }
-    if (newContent.contact) {
-      promises.push(saveContentSection('contact', newContent.contact))
-    }
-    
-    return Promise.all(promises)
   }
 
   // Cargar contenido al inicializar
@@ -185,9 +169,7 @@ export const useContentAPI = () => {
     content: readonly(content),
     isLoading: readonly(isLoading),
     error: readonly(error),
-    saveContent, // Mantiene compatibilidad
-    saveContentSection, // Nueva función específica por sección
     loadContent,
-    baseURL
+    saveContentSection
   }
 }

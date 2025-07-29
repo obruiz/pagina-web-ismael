@@ -9,18 +9,30 @@
         <!-- Desktop Menu -->
         <div class="hidden md:block">
           <div class="ml-10 flex items-baseline space-x-4">
-            <NuxtLink to="/" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Inicio</NuxtLink>
-            <NuxtLink to="#about" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Sobre mí</NuxtLink>
-            <NuxtLink to="#experience" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Experiencia</NuxtLink>
-            <NuxtLink to="#projects" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Proyectos</NuxtLink>
-            <NuxtLink to="#contact" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Contacto</NuxtLink>
+            <NuxtLink to="#about" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('about') }}</NuxtLink>
+            <NuxtLink to="#experience" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('experience') }}</NuxtLink>
+            <NuxtLink to="#projects" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('projects') }}</NuxtLink>
+            <NuxtLink to="#contact" class="text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">{{ t('contact') }}</NuxtLink>
+            
             <a 
-              href="/cv.pdf" 
+              href="/curriculum.pdf" 
               target="_blank"
               class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
             >
-              Descargar CV
+              {{ t('downloadCV') }}
             </a>
+            
+            <!-- Botón de cambio de idioma mejorado -->
+            <button
+              @click="toggleLocale"
+              class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+              :title="t('language')"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+              </svg>
+              <span>{{ currentLocale === 'es' ? 'EN' : 'ES' }}</span>
+            </button>
           </div>
         </div>
 
@@ -30,7 +42,7 @@
             @click="isOpen = !isOpen" 
             class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none"
           >
-            <span class="sr-only">Abrir menú principal</span>
+            <span class="sr-only">{{ t('openMainMenu') }}</span>
             <!-- Icon when menu is closed -->
             <svg 
               v-if="!isOpen"
@@ -65,55 +77,65 @@
     >
       <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
         <NuxtLink 
-          to="/" 
-          class="text-gray-300 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
-          @click="isOpen = false"
-        >
-          Inicio
-        </NuxtLink>
-        <NuxtLink 
           to="#about" 
           class="text-gray-300 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
           @click="isOpen = false"
         >
-          Sobre mí
+          {{ t('about') }}
         </NuxtLink>
         <NuxtLink 
           to="#experience" 
           class="text-gray-300 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
           @click="isOpen = false"
         >
-          Experiencia
+          {{ t('experience') }}
         </NuxtLink>
         <NuxtLink 
           to="#projects" 
           class="text-gray-300 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
           @click="isOpen = false"
         >
-          Proyectos
+          {{ t('projects') }}
         </NuxtLink>
         <NuxtLink 
           to="#contact" 
           class="text-gray-300 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
           @click="isOpen = false"
         >
-          Contacto
+          {{ t('contact') }}
         </NuxtLink>
+        
         <a 
-          href="/cv.pdf" 
+          href="/curriculum.pdf" 
           target="_blank"
           class="bg-primary text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-primary/90 transition-colors"
         >
-          Descargar CV
+          {{ t('downloadCV') }}
         </a>
+        
+        <!-- Botón de cambio de idioma en mobile mejorado -->
+        <button
+          @click="toggleLocale"
+          class="bg-gray-700 hover:bg-gray-600 text-white block px-3 py-2 rounded-md text-base font-medium text-left w-full flex items-center space-x-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+          </svg>
+          <span>{{ t('language') }}: {{ currentLocale === 'es' ? t('english') : t('spanish') }}</span>
+        </button>
       </div>
     </div>
   </nav>
 </template>
 
 <script setup>
+import { useI18n } from '~/composables/useI18n'
+
 const route = useRoute()
 const isOpen = ref(false)
+
+// Usar el sistema de internacionalización
+const { t, currentLocale, toggleLocale } = useI18n()
 
 // Close menu when clicking outside
 onMounted(() => {

@@ -3,17 +3,17 @@
     <div class="max-w-md w-full space-y-8">
       <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Panel de Administrador
+          {{ t('adminPanel') }}
         </h2>
         <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-          Inicia sesión para gestionar el contenido
+          {{ t('loginToManage') }}
         </p>
       </div>
       
       <form @submit.prevent="handleLogin" class="mt-8 space-y-6">
         <div class="rounded-md shadow-sm -space-y-px">
           <div>
-            <label for="username" class="sr-only">Usuario</label>
+            <label for="username" class="sr-only">{{ t('username') }}</label>
             <input
               id="username"
               v-model="form.username"
@@ -21,11 +21,11 @@
               type="text"
               required
               class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Usuario"
+              :placeholder="t('username')"
             />
           </div>
           <div>
-            <label for="password" class="sr-only">Contraseña</label>
+            <label for="password" class="sr-only">{{ t('password') }}</label>
             <input
               id="password"
               v-model="form.password"
@@ -33,7 +33,7 @@
               type="password"
               required
               class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Contraseña"
+              :placeholder="t('password')"
             />
           </div>
         </div>
@@ -48,8 +48,8 @@
             :disabled="loading"
             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
-            <span v-if="loading">Iniciando sesión...</span>
-            <span v-else>Iniciar sesión</span>
+            <span v-if="loading">{{ t('loggingIn') }}</span>
+            <span v-else>{{ t('login') }}</span>
           </button>
         </div>
       </form>
@@ -59,7 +59,7 @@
           to="/" 
           class="text-indigo-600 hover:text-indigo-500 text-sm"
         >
-          ← Volver al sitio web
+          ← {{ t('backToWebsite') }}
         </NuxtLink>
       </div>
     </div>
@@ -67,9 +67,14 @@
 </template>
 
 <script setup>
+import { useI18n } from '~/composables/useI18n'
+
 definePageMeta({
   layout: false
 })
+
+// Usar el sistema de internacionalización
+const { t } = useI18n()
 
 const { login, isAuthenticated } = useAuth()
 
@@ -100,10 +105,10 @@ const handleLogin = async () => {
       // Redirigir al dashboard
       await navigateTo('/admin/dashboard')
     } else {
-      error.value = 'Credenciales incorrectas'
+      error.value = t('invalidCredentials')
     }
   } catch (err) {
-    error.value = 'Error al iniciar sesión'
+    error.value = t('loginError')
   } finally {
     loading.value = false
   }

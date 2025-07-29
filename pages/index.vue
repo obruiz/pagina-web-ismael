@@ -18,10 +18,10 @@
     <!-- About Section -->
     <section id="about" class="py-16 bg-gray-50 dark:bg-gray-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ content.about.title }}</h2>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ t('about') }}</h2>
         <div class="prose dark:prose-invert max-w-none">
-          <p class="text-gray-600 dark:text-gray-300">
-            {{ content.about.content }}
+          <p class="text-gray-600 dark:text-gray-300 whitespace-pre-line">
+            {{ getLocalizedContent('about') }}
           </p>
         </div>
       </div>
@@ -30,7 +30,7 @@
     <!-- Experience Section -->
     <section id="experience" class="py-16 bg-white dark:bg-gray-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ content.experience.title }}</h2>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ t('experience') }}</h2>
         <div class="space-y-8">
           <div 
             v-for="item in content.experience.items" 
@@ -39,7 +39,7 @@
           >
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ item.position }}</h3>
             <p class="text-primary">{{ item.company }} | {{ item.period }}</p>
-            <p class="text-gray-600 dark:text-gray-300 mt-2">
+            <p class="text-gray-600 dark:text-gray-300 mt-2 whitespace-pre-line">
               {{ item.description }}
             </p>
           </div>
@@ -50,7 +50,7 @@
     <!-- Projects Section -->
     <section id="projects" class="py-16 bg-gray-50 dark:bg-gray-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ content.projects.title }}</h2>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ t('projects') }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div 
             v-for="item in content.projects.items" 
@@ -59,7 +59,7 @@
           >
             <div class="p-6">
               <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ item.title }}</h3>
-              <p class="text-gray-600 dark:text-gray-300 mt-2">
+              <p class="text-gray-600 dark:text-gray-300 mt-2 whitespace-pre-line">
                 {{ item.description }}
               </p>
             </div>
@@ -71,9 +71,9 @@
     <!-- Contact Section -->
     <section id="contact" class="py-16 bg-white dark:bg-gray-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ content.contact.title }}</h2>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">{{ t('contact') }}</h2>
         <div class="text-center">
-          <p class="text-gray-600 dark:text-gray-300 mb-4">
+          <p class="text-gray-600 dark:text-gray-300 mb-4 whitespace-pre-line">
             {{ content.contact.description }}
           </p>
           <a 
@@ -89,5 +89,23 @@
 </template>
 
 <script setup>
+import { useI18n } from '~/composables/useI18n'
+
 const { content } = useContentAPI()
+const { t, currentLocale } = useI18n()
+
+// Función para obtener contenido localizado
+const getLocalizedContent = (section) => {
+  if (!content.value?.[section]) return ''
+  
+  // Si el contenido tiene versiones en diferentes idiomas
+  if (content.value[section].content_es && content.value[section].content_en) {
+    return currentLocale.value === 'es' 
+      ? content.value[section].content_es 
+      : content.value[section].content_en
+  }
+  
+  // Fallback al contenido original
+  return content.value[section].content || ''
+}
 </script>

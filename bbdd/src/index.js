@@ -7,7 +7,7 @@
 const corsHeaders = {
 	'Access-Control-Allow-Origin': '*',
 	'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-	'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+	'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cache-Control, Pragma',
 	'Access-Control-Max-Age': '86400',
 };
 
@@ -59,7 +59,12 @@ async function verifyCredentials(env, username, password) {
 function jsonResponse(data, status = 200) {
 	return corsResponse(new Response(JSON.stringify(data), {
 		status,
-		headers: { 'Content-Type': 'application/json' }
+		headers: { 
+			'Content-Type': 'application/json; charset=utf-8',
+			'Cache-Control': 'no-cache, no-store, must-revalidate',
+			'Pragma': 'no-cache',
+			'Expires': '0'
+		}
 	}));
 }
 
@@ -213,7 +218,12 @@ async function getAllContent(env) {
 		const contact = await env.DB.prepare('SELECT * FROM contact ORDER BY id DESC LIMIT 1').first();
 
 		const result = {
-			about: about ? { title: about.title, content: about.content } : null,
+			about: about ? { 
+				title: about.title, 
+				content: about.content,
+				content_es: about.content_es || about.content,
+				content_en: about.content_en || ''
+			} : null,
 			experience: {
 				title: 'Experiencia Profesional',
 				items: experience.results || []
@@ -239,7 +249,12 @@ async function getAllContent(env) {
 
 async function getAbout(env) {
 	const about = await env.DB.prepare('SELECT * FROM about ORDER BY id DESC LIMIT 1').first();
-	return jsonResponse(about ? { title: about.title, content: about.content } : null);
+	return jsonResponse(about ? { 
+		title: about.title, 
+		content: about.content,
+		content_es: about.content_es || about.content,
+		content_en: about.content_en || ''
+	} : null);
 }
 
 async function getExperience(env) {
@@ -272,17 +287,36 @@ async function getContact(env) {
 
 async function updateAbout(request, env) {
 	const body = await request.json();
-	const { title, content } = body;
+	const { title, content, content_es, content_en } = body;
 
-	if (!title || !content) {
-		return errorResponse('Título y contenido requeridos');
+	if (!title) {
+		return errorResponse('Título requerido');
+	}
+
+	// Validar que al menos uno de los contenidos esté presente
+	if (!content && !content_es && !content_en) {
+		return errorResponse('Al menos un contenido es requerido');
 	}
 
 	// Eliminar registro anterior y crear uno nuevo
 	await env.DB.prepare('DELETE FROM about').run();
-	await env.DB.prepare(
-		'INSERT INTO about (title, content) VALUES (?, ?)'
-	).bind(title, content).run();
+	
+	// Intentar insertar con columnas bilingües primero, si falla usar el formato anterior
+	try {
+		await env.DB.prepare(
+			'INSERT INTO about (title, content, content_es, content_en) VALUES (?, ?, ?, ?)'
+		).bind(
+			title, 
+			content || content_es || '', 
+			content_es || content || '', 
+			content_en || ''
+		).run();
+	} catch (error) {
+		// Si falla (columnas no existen), usar solo title y content
+		await env.DB.prepare(
+			'INSERT INTO about (title, content) VALUES (?, ?)'
+		).bind(title, content || content_es || '').run();
+	}
 
 	return jsonResponse({ success: true, message: 'Información actualizada correctamente' });
 }

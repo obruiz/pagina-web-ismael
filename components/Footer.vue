@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col md:flex-row justify-between items-center">
         <div class="mb-4 md:mb-0">
-          <p class="text-sm">© {{ new Date().getFullYear() }} Ismael Bouaouda Ruiz. Todos los derechos reservados.</p>
+          <p class="text-sm">© {{ new Date().getFullYear() }} Ismael Bouaouda Ruiz. {{ t('allRightsReserved') }}.</p>
         </div>
         <div class="flex space-x-6">
           <a href="https://linkedin.com" target="_blank" class="hover:text-primary transition-colors">
@@ -29,3 +29,10 @@
     </div>
   </footer>
 </template>
+
+<script setup>
+import { useI18n } from '~/composables/useI18n'
+
+// Usar el sistema de internacionalización
+const { t } = useI18n()
+</script>

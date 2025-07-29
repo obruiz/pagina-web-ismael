@@ -1,8 +1,10 @@
--- Tabla para la información "Sobre mí"
+-- Tabla para la información "Sobre mí" con soporte bilingüe
 CREATE TABLE IF NOT EXISTS about (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
-    content TEXT NOT NULL,
+    content TEXT NOT NULL, -- Contenido original/español por compatibilidad
+    content_es TEXT, -- Contenido en español
+    content_en TEXT, -- Contenido en inglés
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -44,9 +46,12 @@ CREATE TABLE IF NOT EXISTS admin_users (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insertar datos iniciales
-INSERT OR IGNORE INTO about (title, content) VALUES 
-('Sobre mí', 'Soy un ingeniero químico apasionado por la innovación y la mejora continua de procesos industriales. Mi experiencia se centra en el desarrollo y optimización de procesos químicos, con un fuerte énfasis en la sostenibilidad y la eficiencia energética.');
+-- Insertar datos iniciales con contenido bilingüe
+INSERT OR IGNORE INTO about (title, content, content_es, content_en) VALUES 
+('Sobre mí', 
+ 'Soy un ingeniero químico apasionado por la innovación y la mejora continua de procesos industriales. Mi experiencia se centra en el desarrollo y optimización de procesos químicos, con un fuerte énfasis en la sostenibilidad y la eficiencia energética.',
+ 'Soy un ingeniero químico apasionado por la innovación y la mejora continua de procesos industriales. Mi experiencia se centra en el desarrollo y optimización de procesos químicos, con un fuerte énfasis en la sostenibilidad y la eficiencia energética.',
+ 'I am a chemical engineer passionate about innovation and continuous improvement of industrial processes. My experience focuses on the development and optimization of chemical processes, with a strong emphasis on sustainability and energy efficiency.');
 
 INSERT OR IGNORE INTO experience (position, company, period, description) VALUES 
 ('Ingeniero de Procesos', 'Empresa Química S.A.', '2020 - Presente', 'Desarrollo y optimización de procesos químicos industriales. Implementación de mejoras en eficiencia energética. Gestión de equipos y proyectos de innovación.');
